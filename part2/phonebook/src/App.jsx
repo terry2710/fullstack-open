@@ -1,122 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import {useState} from 'react'
+import Filter from './components/Filter'
+import PersonForm from './components/PersonForm'
+import Persons from './components/Persons'
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+    const [persons, setPersons] = useState([
+        {name: 'Arto Hellas', number: '040-123-456', id: 1},
+        {name: 'Ada Lovelace', number: '394-453-223', id: 2},
+        {name: 'Dan Abramov', number: '102-403-345', id: 3},
+        {name: 'Mary Poppendieck', number: '390-283-122', id: 4}
+    ])
+    const [newName, setNewName] = useState('')
+    const [newNum, setNewNum] = useState('')
+    const [newFilter, setNewFilter] = useState('')
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
+
+    const handleNameChange = (event) => {
+        console.log(event.target.value)
+        setNewName(event.target.value)
+    }
+    const handleNumChange = (event) => {
+        console.log(event.target.value)
+        setNewNum(event.target.value)
+    }
+    const handleFilterChange = (event) => {
+        setNewFilter(event.target.value)
+    }
+
+    const personsToShow = persons.filter(person =>
+        person.name.toLowerCase().includes(newFilter.toLowerCase())
+    )
+
+    const addPerson = (event) => {
+        event.preventDefault()
+
+        const numberPattern = /^\d{3}-\d{3}-\d{3}$/
+
+        if (!numberPattern.test(newNum)) {
+            alert('Number must use the format xxx-xxx-xxx')
+            return
+        }
+
+        const nameExists = persons.some(
+            person => person.name === newName
+        )
+        if (nameExists) {
+            alert(`${newName} has already existed.`)
+            return
+        }
+
+        const nameObject = {
+            name: newName,
+            number: newNum,
+            id: persons.length + 1
+        }
+        setPersons(persons.concat(nameObject))
+        setNewName('')
+        setNewNum('')
+    }
+
+    return (
         <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
+            <h1>Phonebook</h1>
+            <Filter
+                value={newFilter}
+                onChange={handleFilterChange}
+            />
+            <h2>Add a new</h2>
+            <PersonForm
+                onSubmit={addPerson}
+                newName={newName}
+                newNumber={newNum}
+                onNameChange={handleNameChange}
+                onNumberChange={handleNumChange}
+            />
+            <h2>Numbers</h2>
+            <Persons persons={personsToShow}/>
         </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    )
 }
 
 export default App
