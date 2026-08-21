@@ -2,6 +2,7 @@ import {useState, useEffect} from 'react'
 import axios from 'axios'
 import './App.css'
 import Filter from './components/Filter'
+import Notification from "./components/Notification";
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
@@ -30,6 +31,7 @@ const App = () => {
     const [newNum, setNewNum] = useState('')
     const [newFilter, setNewFilter] = useState('')
     const [message, setMessage] = useState(null)
+    const [errorMessage, setErrorMessage] = useState(null)
 
 
     const handleNameChange = (event) => {
@@ -69,15 +71,17 @@ const App = () => {
                 personService
                     .update(existingPerson.id, changedPerson)
                     .then(returnedPerson => {
+                        setMessage(`New number has been added to ${existingPerson.name}`)
+                        setTimeout(() => setMessage(null), 5000)
                         setPersons(persons.map(p => p.id !== existingPerson.id ? p : returnedPerson))
                         setNewName('')
                         setNewNum('')
                     })
                     .catch(error => {
-                        setMessage(`${person.name} was already removed from server`)
+                        setErrorMessage(`${existingPerson.name} was already removed from server`)
                         setTimeout(() => {
-                            setMessage(null)
-                        }, 6000)
+                            setErrorMessage(null)
+                        }, 5000)
                         setPersons(persons.filter(p => p.id !== existingPerson.id))
                     })
             }
@@ -92,6 +96,8 @@ const App = () => {
         personService
             .create(personObject)
             .then(rePerson => {
+                setMessage(`${newName} has been added`)
+                setTimeout(() => setMessage(null), 5000)
                 setPersons(persons.concat(rePerson))
                 setNewName('')
                 setNewNum('')
@@ -108,13 +114,13 @@ const App = () => {
                     setMessage(`${person.name} has been successfully removed`)
                     setTimeout(() => {
                         setMessage(null)
-                    }, 6000)
+                    }, 5000)
                 })
                 .catch(error => {
-                    setMessage(`${person.name} was already removed from server`)
+                    setErrorMessage(`${person.name} was already removed from server`)
                     setTimeout(() => {
-                        setMessage(null)
-                    }, 6000)
+                        setErrorMessage(null)
+                    }, 5000)
                     setPersons(persons.filter(p => p.id !== id))
                 })
         }
@@ -125,6 +131,8 @@ const App = () => {
     return (
         <div>
             <h1>Phonebook</h1>
+            <Notification message={message} type="notification"/>
+            <Notification message={errorMessage} type="error"/>
             <Filter
                 value={newFilter}
                 onChange={handleFilterChange}
@@ -138,7 +146,6 @@ const App = () => {
                 onNumberChange={handleNumChange}
             />
             <h2>Numbers</h2>
-            {message && <div className="notification">{message}</div>}
             <Persons
                 persons={personsToShow}
                 onDelete={deletePerson}
