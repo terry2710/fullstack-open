@@ -66,7 +66,7 @@ const App = () => {
         const nameObject = {
             name: newName,
             number: newNum,
-            id: persons.length + 1
+            id: String(persons.length + 1),
         }
         setPersons(persons.concat(nameObject))
         setNewName('')
