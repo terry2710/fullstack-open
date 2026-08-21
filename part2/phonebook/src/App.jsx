@@ -1,8 +1,10 @@
 import {useState, useEffect} from 'react'
 import axios from 'axios'
+import './App.css'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import personService from './services/persons'
 
 const App = () => {
     // const [persons, setPersons] = useState([
@@ -15,11 +17,11 @@ const App = () => {
     const [persons, setPersons] = useState([])
     useEffect(() => {
         console.log('effect')
-        axios
-            .get('http://localhost:3001/persons')
-            .then(response => {
+        personService
+            .getAll()
+            .then(initPersons => {
                 console.log('promise fulfilled')
-                setPersons(response.data)
+                setPersons(initPersons)
             })
     }, [])
     console.log('render', persons.length, 'persons')
@@ -27,6 +29,7 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newNum, setNewNum] = useState('')
     const [newFilter, setNewFilter] = useState('')
+    const [message, setMessage] = useState(null)
 
 
     const handleNameChange = (event) => {
@@ -55,23 +58,69 @@ const App = () => {
         //     return
         // }
 
-        const nameExists = persons.some(
+        const existingPerson = persons.find(
             person => person.name === newName
         )
-        if (nameExists) {
-            alert(`${newName} has already existed.`)
+
+        if (existingPerson) {
+            if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+                const changedPerson = {...existingPerson, number: newNum}
+
+                personService
+                    .update(existingPerson.id, changedPerson)
+                    .then(returnedPerson => {
+                        setPersons(persons.map(p => p.id !== existingPerson.id ? p : returnedPerson))
+                        setNewName('')
+                        setNewNum('')
+                    })
+                    .catch(error => {
+                        setMessage(`${person.name} was already removed from server`)
+                        setTimeout(() => {
+                            setMessage(null)
+                        }, 6000)
+                        setPersons(persons.filter(p => p.id !== existingPerson.id))
+                    })
+            }
             return
         }
 
-        const nameObject = {
+        const personObject = {
             name: newName,
-            number: newNum,
-            id: String(persons.length + 1),
+            number: newNum
         }
-        setPersons(persons.concat(nameObject))
-        setNewName('')
-        setNewNum('')
+
+        personService
+            .create(personObject)
+            .then(rePerson => {
+                setPersons(persons.concat(rePerson))
+                setNewName('')
+                setNewNum('')
+            })
     }
+
+    const deletePerson = (id) => {
+        const person = persons.find(p => p.id === id)
+        if (window.confirm(`Delete ${person.name}`)) {
+            personService
+                .remove(id)
+                .then(() => {
+                    setPersons(persons.filter(p => p.id !== id))
+                    setMessage(`${person.name} has been successfully removed`)
+                    setTimeout(() => {
+                        setMessage(null)
+                    }, 6000)
+                })
+                .catch(error => {
+                    setMessage(`${person.name} was already removed from server`)
+                    setTimeout(() => {
+                        setMessage(null)
+                    }, 6000)
+                    setPersons(persons.filter(p => p.id !== id))
+                })
+        }
+
+    }
+
 
     return (
         <div>
@@ -89,7 +138,12 @@ const App = () => {
                 onNumberChange={handleNumChange}
             />
             <h2>Numbers</h2>
-            <Persons persons={personsToShow}/>
+            {message && <div className="notification">{message}</div>}
+            <Persons
+                persons={personsToShow}
+                onDelete={deletePerson}
+
+            />
         </div>
     )
 }
