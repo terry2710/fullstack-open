@@ -10,7 +10,14 @@ if (process.argv.length !== 3 && process.argv.length !== 5) {
 
 const password = process.argv[2]
 
-const url = `mongodb://greecehalf:${password}@ac-3dhnf1l-shard-00-00.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-01.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-02.dxhpjcs.mongodb.net:27017/phonebook?ssl=true&replicaSet=atlas-e3ybpv-shard-0&authSource=admin&appName=Cluster0`
+// Toggle this when switching networks:
+// true  -> works on library WiFi / most home networks
+// false -> works on mobile hotspot (SRV DNS lookup fails there)
+const USE_SRV = true
+
+const url = USE_SRV
+  ? `mongodb+srv://greecehalf:${password}@cluster0.dxhpjcs.mongodb.net/phonebook?appName=Cluster0`
+  : `mongodb://greecehalf:${password}@ac-3dhnf1l-shard-00-00.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-01.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-02.dxhpjcs.mongodb.net:27017/phonebook?ssl=true&replicaSet=atlas-e3ybpv-shard-0&authSource=admin&appName=Cluster0`
 
 mongoose.set('strictQuery', false)
 
