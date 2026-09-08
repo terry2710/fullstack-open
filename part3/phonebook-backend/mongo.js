@@ -16,8 +16,8 @@ const password = process.argv[2]
 const USE_SRV = true
 
 const url = USE_SRV
-  ? `mongodb+srv://greecehalf:${password}@cluster0.dxhpjcs.mongodb.net/phonebook?appName=Cluster0`
-  : `mongodb://greecehalf:${password}@ac-3dhnf1l-shard-00-00.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-01.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-02.dxhpjcs.mongodb.net:27017/phonebook?ssl=true&replicaSet=atlas-e3ybpv-shard-0&authSource=admin&appName=Cluster0`
+    ? `mongodb+srv://greecehalf:${password}@cluster0.dxhpjcs.mongodb.net/phonebook?appName=Cluster0`
+    : `mongodb://greecehalf:${password}@ac-3dhnf1l-shard-00-00.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-01.dxhpjcs.mongodb.net:27017,ac-3dhnf1l-shard-00-02.dxhpjcs.mongodb.net:27017/phonebook?ssl=true&replicaSet=atlas-e3ybpv-shard-0&authSource=admin&appName=Cluster0`
 
 mongoose.set('strictQuery', false)
 
@@ -44,7 +44,7 @@ if (process.argv.length === 3) {
         name: process.argv[3],
         number: process.argv[4],
     })
-    person.save().then(result => {
+    person.save().then(() => {
         console.log(`added ${process.argv[3]} number ${process.argv[4]} to phonebook`)
         mongoose.connection.close()
     })
