@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const dummy = (blogs) => {
     return 1
 }
@@ -25,17 +27,23 @@ const favoriteBlog = (blogs) => {
 }
 
 const favoriteBlogByAuthor = (blogs) => {
-    const grouped = blogs.reduce((acc, blog) => {
-        if (!acc[blog.author] || blog.likes > acc[blog.author].likes) {
-            acc[blog.author] = blog
-        }
-        return acc
-    }, {})
+    if (blogs.length === 0) {
+        return []
+    }
 
-    return Object.keys(grouped).map(author => ({
-        author,
-        favoriteBlog: grouped[author]
-    }))
+    const grouped = _.groupBy(blogs, 'author')
+
+    return Object.keys(grouped).map((author) => {
+        const favorite = _.maxBy(grouped[author], 'likes')
+        return {
+            author,
+            favoriteBlog: {
+                author: favorite.author,
+                likes: favorite.likes,
+                title: favorite.title,
+            },
+        }
+    })
 }
 
 const mostBlogs = (blogs) => {
@@ -43,14 +51,8 @@ const mostBlogs = (blogs) => {
         return null
     }
 
-    const counts = blogs.reduce((acc, blog) => {
-        acc[blog.author] = (acc[blog.author] || 0) + 1
-        return acc
-    }, {})
-
-    const topAuthor = Object.keys(counts).reduce((top, author) => {
-        return counts[author] > counts[top] ? author : top
-    })
+    const counts = _.countBy(blogs, 'author')
+    const topAuthor = _.maxBy(Object.keys(counts), author => counts[author])
 
     return {
         author: topAuthor,
@@ -58,25 +60,22 @@ const mostBlogs = (blogs) => {
     }
 }
 
+
 const mostLikes = (blogs) => {
     if (blogs.length === 0) {
         return null
     }
 
-    const likesByAuthor = blogs.reduce((acc, blog) => {
-        acc[blog.author] = (acc[blog.author] || 0) + blog.likes
-        return acc
-    }, {})
+    const byAuthor = _.groupBy(blogs, 'author')
 
-    const topAuthor = Object.keys(likesByAuthor).reduce((top, author) => {
-        return likesByAuthor[author] > likesByAuthor[top] ? author : top
-    })
+    const totals = Object.keys(byAuthor).map((author) => ({
+        author,
+        likes: _.sumBy(byAuthor[author], 'likes'),
+    }))
 
-    return {
-        author: topAuthor,
-        likes: likesByAuthor[topAuthor]
-    }
+    return _.maxBy(totals, 'likes')
 }
+
 
 module.exports = {
     dummy,
